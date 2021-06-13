@@ -197,6 +197,45 @@ static int xmp_rename(const char *from, const char *to)
     return 0;
 }
 
+static int xmp_unlink(const char *path)
+{
+    char fpath[1000];
+    if(strcmp(path,"/") == 0)
+    {
+        path=dirpath;
+
+        sprintf(fpath,"%s",path);
+    }
+    else sprintf(fpath, "%s%s",dirpath,path);
+	int res;
+
+	res = unlink(fpath);
+	if (res == -1)
+		return -errno;
+
+	return 0;
+}
+
+static int xmp_rmdir(const char *path)
+{
+
+    char fpath[1000];
+    if(strcmp(path,"/") == 0)
+    {
+        path=dirpath;
+
+        sprintf(fpath,"%s",path);
+    }
+    else sprintf(fpath, "%s%s",dirpath,path);
+	int res;
+
+	res = rmdir(fpath);
+	if (res == -1)
+		return -errno;
+
+	return 0;
+}
+
 void logging(char *nama, char *fpath)
 {
 	time_t rawtime;
@@ -247,6 +286,8 @@ static struct fuse_operations xmp_oper = {
     .read = xmp_read,
     .mkdir = xmp_mkdir,
     .rename = xmp_rename,
+    .unlink = xmp_unlink,
+    .rmdir = xmp_rmdir,
 };
 
 
