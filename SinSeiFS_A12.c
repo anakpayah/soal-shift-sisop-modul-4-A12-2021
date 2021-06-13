@@ -8,6 +8,8 @@
 #include <errno.h>
 #include <sys/time.h>
 
+int x = 0;
+
 static  const  char *dirpath = "/home/kelvin/Downloads";
 
 static  int  xmp_getattr(const char *path, struct stat *stbuf)
@@ -16,7 +18,6 @@ static  int  xmp_getattr(const char *path, struct stat *stbuf)
     char fpath[1000];
 
     sprintf(fpath,"%s%s",dirpath,path);
-
     res = lstat(fpath, stbuf);
 
     if (res == -1) return -errno;
@@ -35,9 +36,6 @@ static int xmp_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
         path=dirpath;
         sprintf(fpath,"%s",path);
     } else sprintf(fpath, "%s%s",dirpath,path);
-    
-    if (x != 24) x++;
-	else logging("READDIR", fpath);
 
     int res = 0;
 
@@ -80,10 +78,14 @@ static int xmp_read(const char *path, char *buf, size_t size, off_t offset, stru
     }
     else sprintf(fpath, "%s%s",dirpath,path);
 
+    if (x != 24) x++;
+	else logging("READDIR", fpath);
+
     int res = 0;
     int fd = 0 ;
 
     (void) fi;
+
     logging("READ", path);
 
     fd = open(fpath, O_RDONLY);
@@ -100,20 +102,99 @@ static int xmp_read(const char *path, char *buf, size_t size, off_t offset, stru
 }
 
 
+int check(char string1[], char string2[]){
+    int j=0;
+    for(int i=0; i<strlen(string1); i++){
+        if(string1[i]==string2[j]) j++;
+        else j=0;
+        if(j==strlen(string2)) return 1;
+    }
+    return 0;
+}
+
+
 
 static int xmp_mkdir(const char *path, mode_t mode)
 {
-	int res;
     char fpath[1000];
 
-    sprintf(fpath, "%s%s", dirpath, path);
-	res = mkdir(path, mode);
-	logging("MKDIR", fpath);
-	
+    if(strcmp(path,"/") == 0)
+    {
+        path=dirpath;
+
+        sprintf(fpath,"%s",path);
+    }
+    else sprintf(fpath, "%s%s",dirpath,path);
+
+	int res;
+	res = mkdir(fpath, mode);
+    logging("MKDIR", fpath);
 	if (res == -1)
 		return -errno;
-
+    char newname[2000];
+    char filename[1000];
+    sprintf(filename,"%s",path);
+    char prefix[10]="/AtoZ_";
+    if(check(fpath,prefix)==1){
+        char nama[1000];
+        sprintf(nama,"%s",filename);
+        for(int i=0;nama[i]!='\0';i++){
+            if(nama[i]>='A'&&nama[i]<='Z') nama[i]='Z'-nama[i]+'A';
+            if(nama[i]>='a'&&nama[i]<='z') nama[i]='z'-nama[i]+'a';
+        }
+        sprintf(newname,"%s%s",dirpath,nama);
+        printf("%s\n",fpath);
+        printf("%s\n",newname);
+        rename(fpath, newname); 
+    }
 	return 0;
+}
+
+
+
+static int xmp_rename(const char *from, const char *to)
+{
+    char fpath[1000];
+    char tpath[1000];
+    if(strcmp(from,"/") == 0)
+    {
+        from=dirpath;
+
+        sprintf(fpath,"%s",from);
+        sprintf(tpath,"%s",to);
+    }
+    else
+    {
+        sprintf(fpath, "%s%s",dirpath,from);
+        sprintf(tpath, "%s%s",dirpath,to);
+    } 
+	int res;
+	res = rename(fpath, tpath);
+	if (res == -1)
+		return -errno;
+    DIR *dir;
+    struct dirent *ent;
+    char oldname[2000], newname[2000];
+    char prefix[10]="/AtoZ_";
+    if(check(tpath,prefix)==1){
+        if ((dir = opendir (tpath)) != NULL) 
+        {
+            while ((ent = readdir (dir)) != NULL) 
+            {
+                char nama[1000];
+                sprintf(nama,"%s",ent->d_name);
+                for(int i=0;nama[i]!='\0';i++){
+                    if(nama[i]>='A'&&nama[i]<='Z') nama[i]='Z'-nama[i]+'A';
+                    if(nama[i]>='a'&&nama[i]<='z') nama[i]='z'-nama[i]+'a';
+                }
+                sprintf(oldname,"%s/%s",tpath,ent->d_name);
+                sprintf(newname,"%s/%s",tpath,nama);
+                rename(oldname, newname);         
+            }
+        closedir (dir);
+        } 
+    }
+    return 0;
 }
 
 void logging(char *nama, char *fpath)
@@ -160,12 +241,12 @@ void logging2(char *nama, char *fpath, char *ke)
 	return;
 }
 
-
 static struct fuse_operations xmp_oper = {
     .getattr = xmp_getattr,
     .readdir = xmp_readdir,
     .read = xmp_read,
     .mkdir = xmp_mkdir,
+    .rename = xmp_rename,
 };
 
 
