@@ -126,4 +126,62 @@ Di sini jika folder direname, cek jika nama baru memiliki awalan "AtoZ_", jika i
 
 ## Soal Nomor 4
 
+Untuk soal ini kita diminta untuk membuat log system dari segala program yang telah dieksekusi yang bertujuan agar mudah untuk memonitoring kegiatan dan kejadian yang ada pada jalannya program. terdapat 2 jenis log yang bida ditulis dalam sebuah file system log yang bernama `SinSeiFS.log`. Fungsi ini akan menuliskan sebuah log-log kenalam file log tersebut dengan format yang telah tientukan sebelumnya. namun disini dibuat 2 jenis fungsi yaitu 'logging' dan 'logging2' sebenrnya sama saja, namun dikarenakan ada output dengan parameter yang berbeda maka hanya berbeda di beberapa bagian kecil saja.  
 
+```c
+void logging(char *nama, char *fpath)
+{
+	time_t rawtime;
+	struct tm *timeinfo;
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+	
+
+```  
+pada potonggan kode diatas yaitu untuk mencari waktu dari secara Real-Time dari segala kegiatan eksekusi file dalam program.  
+```c
+	char text[1000];
+
+	FILE *file;
+	file = fopen("/home/kelvin/SinSeiFS.log", "a");
+	
+	if (strcmp(nama, "RMDIR") == 0 || strcmp(nama, "UNLINK") == 0)
+		sprintf(text, "WARNING::%.2d%.2d%d-%.2d:%.2d:%.2d::%s::%s\n", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, nama, fpath);
+	else
+		sprintf(text, "INFO::%.2d%.2d%d-%.2d:%.2d:%.2d::%s::%s\n", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, nama, fpath);
+
+```
+selanjutnya kita inisialisai sebuah arrat `text` yang nantinya akan digunakan untuk menyimpah suatu log secara sementara lalu akan ditaru pada file log yang telah dibuat sebelumnya. untuk 3 baris berikutnya yang diatas merupakan persyaratan dimana itu untuk membedakan level yang ada antara `INFO` dan `WARNING`.  
+```c
+	fputs(text, file);
+	fclose(file);
+	return;
+}
+```  
+lalu kita inputkan ke file dan kita tutup file tersebut. untuk `logging2 sma saja dan hanya berbeda sedikit seperti yang diucapkan tadi. code fungsi `logging2()` sebagai berikut :  
+```c
+void logging2(char *nama, char *fpath, char *ke)
+{
+	time_t rawtime;
+	struct tm *timeinfo;
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+
+	char text[1000];
+
+	FILE *file;
+	file = fopen("/home/kelvin/SinSeiFS.log", "a");
+
+	if (strcmp(nama, "RMDIR") == 0 || strcmp(nama, "UNLINK") == 0)
+		sprintf(text, "WARNING::%.2d%.2d%d-%.2d:%.2d:%.2d::%s::%s::%s\n", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, nama, fpath, ke);
+	else
+		sprintf(text, "INFO::%.2d%.2d%d-%.2d:%.2d:%.2d::%s::%s::%s\n", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, nama, fpath, ke);
+
+	fputs(text, file);
+	fclose(file);
+	return;
+}
+```  
+lalu ada contoh dari log dimana program system nomor 1 dijalankan sebagai berikut :  
+
+ ![conoth no1 modul 4](https://user-images.githubusercontent.com/75328763/121812670-f6a17500-cc92-11eb-8e4f-1c0022f5a568.png)
