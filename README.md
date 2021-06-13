@@ -112,3 +112,18 @@ Di sini jika folder direname, cek jika nama baru memiliki awalan "AtoZ_", jika i
 ![image](https://user-images.githubusercontent.com/7587945/121809716-1aab8900-cc88-11eb-80ac-bf5e1d8bc27c.png)
 ![image](https://user-images.githubusercontent.com/7587945/121809729-27c87800-cc88-11eb-932d-2734a538d28f.png)
 ![image](https://user-images.githubusercontent.com/7587945/121809740-39aa1b00-cc88-11eb-8c46-640bc1f91e96.png)
+
+<hr>  
+
+## Soal Nomor 2
+
+
+<hr>  
+
+## Soal Nomor 3
+
+<hr>
+
+## Soal Nomor 4
+
+
